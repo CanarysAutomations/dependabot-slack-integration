@@ -65,12 +65,12 @@ namespace githubeventslack
             {
                
                 SlackText st = new SlackText();
-                st.text = $"*Package name:* {payload.package_name}  \n " +
+                st.text = $"*Package Name:* {payload.package_name}  \n " +
                     $"*Vulnerability Version Range:* {payload.vulnerable_version_range} \n" +
                     $"*Patched Version:* {payload.identifier} \n " +
                     $"*Severity:* {payload.severity} \n " +
                     $"*Summary:* {payload.summary}\n" +
-                    $"*Manifest URL Path:* {payload.manifest_path}";
+                    $"*Manifest url path :* {payload.manifest_path}";
                 if(st.accessory == null|| st.accessory.type == null)
                 {
                     st.accessory = new();
