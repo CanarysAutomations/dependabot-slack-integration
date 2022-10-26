@@ -42,7 +42,7 @@ namespace githubeventslack
             payload.manifest_path = data.alert.dependency.manifest_path;
             
 
-            if (data.action =="reintroduced"||data.action =="fixed")
+            if (data.action =="reintroduced")
             {
                 log.LogInformation(requestBody);
             }
@@ -70,7 +70,7 @@ namespace githubeventslack
                     $"*Patched Version:* {payload.identifier} \n " +
                     $"*Severity:* {payload.severity} \n " +
                     $"*Summary:* {payload.summary}\n" +
-                    $"*Manifest url path :* {payload.manifest_path}";
+                    $"*Manifest_path :* {payload.manifest_path}";
                 if(st.accessory == null|| st.accessory.type == null)
                 {
                     st.accessory = new();
