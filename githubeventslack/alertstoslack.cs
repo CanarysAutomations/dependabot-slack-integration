@@ -10,18 +10,21 @@ using Newtonsoft.Json;
 using githubeventslack.Model;
 using System.Net.Http;
 using System.Text;
+using System.Configuration;
 using System.Collections.Specialized;
+using System.Reflection.Emit;
 
 namespace githubeventslack
 {
     public static class alertstoslack
     {
+
         [FunctionName("alertstoslack")]
         public static async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("Git-hub slack pipeline");
+            log.LogInformation("Sending GitHub Payload to Slack function started");
 
             
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
@@ -37,10 +40,11 @@ namespace githubeventslack
             payload.vulnerable_version_range = data.alert.security_vulnerability.vulnerable_version_range;
             payload.identifier = data.alert.security_vulnerability.first_patched_version.identifier;
             payload.manifest_path = data.alert.dependency.manifest_path;
+            
 
             if (data.action =="reintroduced"||data.action =="fixed")
             {
-                log.LogInformation(payload.ToString());  
+                log.LogInformation(requestBody);
             }
             else
             {
@@ -53,22 +57,31 @@ namespace githubeventslack
         
         public static async Task<string> SendSlackMessage(Payload payload)
         {
-  
-            var slackWebhookUrl = "https://hooks.slack.com/services/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";
-        
+
             
+            var slackWebhookUrl = "https://hooks.slack.com/services/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";
+
             using (var client = new HttpClient())
             {
-
+               
                 SlackText st = new SlackText();
-                st.text = $"*Package name:* {payload.package_name}  \n " +
+                st.text = $"*Package Name:* {payload.package_name}  \n " +
                     $"*Vulnerability Version Range:* {payload.vulnerable_version_range} \n" +
                     $"*Patched Version:* {payload.identifier} \n " +
                     $"*Severity:* {payload.severity} \n " +
-                    $"*Summary:* {payload.summary}\n";
-                   
-                //st.accessory = "{type : button \n  text : {\n type: plain_text \n text : View Advisory \n emoji : true }, style : danger , url :$'{payload.url}} }";
-                //st.accessory.type = "button";
+                    $"*Summary:* {payload.summary}\n" +
+                    $"*Manifest url path :* {payload.manifest_path}";
+                if(st.accessory == null|| st.accessory.type == null)
+                {
+                    st.accessory = new();
+                    st.accessory.text = new();
+                }
+                st.accessory.type = "button";
+                st.accessory.text.type = "plain_text";
+                st.accessory.text.text = "View Advisory";
+                st.accessory.text.emoji = true;
+                st.accessory.style = "danger";
+                st.accessory.url = $"https://github.com/advisories/{payload.ghsa_id}";
 
 
 
@@ -95,7 +108,6 @@ namespace githubeventslack
         public string text { get; set; }
 
         public Accessory accessory { get; set; }
-       
         public class Accessory
         {
             public string type { get; set; }
@@ -104,15 +116,11 @@ namespace githubeventslack
             public string url { get; set; }
         }
 
-        
-
         public class Text
         {
             public string type { get; set; }
             public string text { get; set; }
             public bool emoji { get; set; }
         }
-
-
     }
 }
