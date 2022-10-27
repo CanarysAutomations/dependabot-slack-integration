@@ -13,6 +13,8 @@ using System.Text;
 using System.Configuration;
 using System.Collections.Specialized;
 using System.Reflection.Emit;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace githubeventslack
 {
@@ -26,7 +28,7 @@ namespace githubeventslack
         {
             log.LogInformation("Sending GitHub Payload to Slack function started");
 
-            
+
             string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
             var data = JsonConvert.DeserializeObject<Githubhook.Root>(requestBody);
             Payload payload = new Payload();
@@ -40,9 +42,9 @@ namespace githubeventslack
             payload.vulnerable_version_range = data.alert.security_vulnerability.vulnerable_version_range;
             payload.identifier = data.alert.security_vulnerability.first_patched_version.identifier;
             payload.manifest_path = data.alert.dependency.manifest_path;
-            
 
-            if (data.action =="reintroduced")
+
+            if (data.action == "reintroduced")
             {
                 log.LogInformation(requestBody);
             }
@@ -51,39 +53,51 @@ namespace githubeventslack
                 await SendSlackMessage(payload);
             }
 
-            Payload  responseMessage = payload ;
+            Payload responseMessage = payload;
             return new OkObjectResult(responseMessage);
         }
-        
+
         public static async Task<string> SendSlackMessage(Payload payload)
         {
 
-            
+
             var slackWebhookUrl = "https://hooks.slack.com/services/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";
 
             using (var client = new HttpClient())
             {
-               
-                SlackText st = new SlackText();
-                st.text = $"*Package Name:* {payload.package_name}  \n " +
-                    $"*Vulnerability Version Range:* {payload.vulnerable_version_range} \n" +
-                    $"*Patched Version:* {payload.identifier} \n " +
-                    $"*Severity:* {payload.severity} \n " +
-                    $"*Summary:* {payload.summary}\n" +
-                    $"*Manifest_path :* {payload.manifest_path}";
-                if(st.accessory == null|| st.accessory.type == null)
-                {
-                    st.accessory = new();
-                    st.accessory.text = new();
-                }
-                st.accessory.type = "button";
-                st.accessory.text.type = "plain_text";
-                st.accessory.text.text = "View Advisory";
-                st.accessory.text.emoji = true;
-                st.accessory.style = "danger";
-                st.accessory.url = $"https://github.com/advisories/{payload.ghsa_id}";
 
+                SlackText.Root st = new SlackText.Root();
+                SlackText.Attachment at = new SlackText.Attachment();
+                at.blocks = new();
 
+                st.attachments = new List<SlackText.Attachment>();
+                SlackText.Block bl = new SlackText.Block();
+
+                bl.type = "section";
+                bl.text = new SlackText.BText();
+                bl.text.type = "mrkdwn";
+                bl.text.text = $"*Package Name:* {payload.package_name}  \n " +
+                   $"*Vulnerability Version Range:* {payload.vulnerable_version_range} \n" +
+                   $"*Patched Version:* {payload.identifier} \n " +
+                   $"*Severity:* {payload.severity} \n " +
+                   $"*Summary:* {payload.summary}\n" +
+                   $"*Manifest_path :* {payload.manifest_path}";
+                bl.accessory = new SlackText.Accessory();
+                bl.accessory.type = "button";
+
+                bl.accessory.text = new();
+
+                bl.accessory.text.type = "plain_text";
+                bl.accessory.text.text = "View Advisory";
+                bl.accessory.text.emoji = true;
+                bl.accessory.value = "view advisory";
+                bl.accessory.url = $"https://github.com/advisories/{payload.ghsa_id}";
+                bl.accessory.action_id = "button-action";
+                
+                at.blocks.Add(bl);
+                st.attachments.Add(at);
+
+                string sa = JsonConvert.SerializeObject(st);
 
                 var data = new StringContent(JsonConvert.SerializeObject(st), Encoding.UTF8, "application/json");
                 HttpMethod method = HttpMethod.Post;
@@ -105,15 +119,30 @@ namespace githubeventslack
 
     public class SlackText
     {
-        public string text { get; set; }
-
-        public Accessory accessory { get; set; }
         public class Accessory
         {
             public string type { get; set; }
             public Text text { get; set; }
-            public string style { get; set; }
+            public string value { get; set; }
             public string url { get; set; }
+            public string action_id { get; set; }
+        }
+
+        public class Attachment
+        {
+            public List<Block> blocks { get; set; }
+        }
+
+        public class Block
+        {
+            public string type { get; set; }
+            public BText text { get; set; }
+            public Accessory accessory { get; set; }
+        }
+
+        public class Root
+        {
+            public List<Attachment> attachments { get; set; }
         }
 
         public class Text
@@ -121,6 +150,11 @@ namespace githubeventslack
             public string type { get; set; }
             public string text { get; set; }
             public bool emoji { get; set; }
+        }
+        public class BText
+        {
+            public string type { get; set; }
+            public string text { get; set; }
         }
     }
 }
