@@ -18,6 +18,7 @@ namespace githubeventslack.Model
         public string vulnerable_version_range { get; set; }
         public string identifier { get; set; }
         public string manifest_path { get; set; }
+        public string repository { get; set; }
 
     }
 }

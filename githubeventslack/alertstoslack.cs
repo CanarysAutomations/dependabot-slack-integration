@@ -42,6 +42,7 @@ namespace githubeventslack
             payload.vulnerable_version_range = data.alert.security_vulnerability.vulnerable_version_range;
             payload.identifier = data.alert.security_vulnerability.first_patched_version.identifier;
             payload.manifest_path = data.alert.dependency.manifest_path;
+            payload.repository = data.repository.name;
 
 
             if (data.action == "fixed")
@@ -61,8 +62,8 @@ namespace githubeventslack
         {
 
 
-            var slackWebhookUrl = "https://hooks.slack.com/services/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";
-            
+            var slackWebHookUrl = "https://hooks.slack.com/services/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";
+           // var slackWebHookUrl = Environment.GetEnvironmentVariable("SLACKWEBHOOKURL");
             using (var client = new HttpClient())
             {
 
@@ -76,12 +77,13 @@ namespace githubeventslack
                 bl.type = "section";
                 bl.text = new SlackText.BText();
                 bl.text.type = "mrkdwn";
-                bl.text.text = $"*Package Name:* {payload.package_name}  \n " +
-                   $"*Vulnerability Version Range:* {payload.vulnerable_version_range} \n" +
-                   $"*Patched Version:* {payload.identifier} \n " +
-                   $"*Severity:* {payload.severity} \n " +
-                   $"*Summary:* {payload.summary}\n" +
-                   $"*Manifest_path :* {payload.manifest_path}";
+                bl.text.text = $"*Package Name :* {payload.package_name}  \n " +
+                   $"*Vulnerability Version Range :* {payload.vulnerable_version_range} \n" +
+                   $"*Patched Version :* {payload.identifier} \n " +
+                   $"*Severity :* {payload.severity} \n " +
+                   $"*Summary :* {payload.summary}\n" +
+                   $"*Manifest_path :* {payload.manifest_path}\n" +
+                   $"*Repository Name :*{payload.repository}";
                 bl.accessory = new SlackText.Accessory();
                 bl.accessory.type = "button";
 
@@ -102,7 +104,7 @@ namespace githubeventslack
 
                 var data = new StringContent(JsonConvert.SerializeObject(st), Encoding.UTF8, "application/json");
                 HttpMethod method = HttpMethod.Post;
-                var requestMessage = new HttpRequestMessage(method, slackWebhookUrl) { Content = data };
+                var requestMessage = new HttpRequestMessage(method, slackWebHookUrl) { Content = data };
                 var response = await client.SendAsync(requestMessage);
                 response.EnsureSuccessStatusCode();
                 if (response.IsSuccessStatusCode)
