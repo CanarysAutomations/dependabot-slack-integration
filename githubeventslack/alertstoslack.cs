@@ -44,7 +44,7 @@ namespace githubeventslack
             payload.manifest_path = data.alert.dependency.manifest_path;
 
 
-            if (data.action == "reintroduced")
+            if (data.action == "fixed")
             {
                 log.LogInformation(requestBody);
             }
@@ -62,7 +62,7 @@ namespace githubeventslack
 
 
             var slackWebhookUrl = "https://hooks.slack.com/services/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";
-
+            
             using (var client = new HttpClient())
             {
 
