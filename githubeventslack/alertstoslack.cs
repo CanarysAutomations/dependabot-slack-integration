@@ -93,6 +93,7 @@ namespace githubeventslack
                 bl.accessory.value = "view advisory";
                 bl.accessory.url = $"https://github.com/advisories/{payload.ghsa_id}";
                 bl.accessory.action_id = "button-action";
+                bl.accessory.style = "danger";
                 
                 at.blocks.Add(bl);
                 st.attachments.Add(at);
@@ -126,6 +127,7 @@ namespace githubeventslack
             public string value { get; set; }
             public string url { get; set; }
             public string action_id { get; set; }
+            public string style { get; set; }
         }
 
         public class Attachment
