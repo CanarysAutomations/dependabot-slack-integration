@@ -83,7 +83,7 @@ namespace githubeventslack
                    $"*Severity :* {payload.severity} \n " +
                    $"*Summary :* {payload.summary}\n" +
                    $"*Manifest_path :* {payload.manifest_path}\n" +
-                   $"*Repository Name :*{payload.repository}";
+                   $"*Repository Name :* {payload.repository}";
                 bl.accessory = new SlackText.Accessory();
                 bl.accessory.type = "button";
 
