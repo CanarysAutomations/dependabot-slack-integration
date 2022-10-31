@@ -15,11 +15,15 @@ using System.Collections.Specialized;
 using System.Reflection.Emit;
 using System.Collections.Generic;
 using System.Linq;
+using System.Drawing;
+using static githubeventslack.SlackText;
+using Microsoft.Extensions.Primitives;
 
 namespace githubeventslack
 {
     public static class alertstoslack
     {
+        
 
         [FunctionName("alertstoslack")]
         public static async Task<IActionResult> Run(
@@ -59,19 +63,52 @@ namespace githubeventslack
         }
 
         public static async Task<string> SendSlackMessage(Payload payload)
-        {
+        { 
+
+            var slackWebHookUrl = "https://hooks.slack.com/services/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";
+            //var slackWebHookUrl = Environment.GetEnvironmentVariable("SLACKWEBHOOKURL");
+            string color = string.Empty;
+            var severity = string.Empty;
 
 
-            var slackWebHookUrl = "https://hooks.slack.com/services/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";
-           // var slackWebHookUrl = Environment.GetEnvironmentVariable("SLACKWEBHOOKURL");
+            //StringBuilder paySeverity = new StringBuilder();
+
+            if (payload.severity=="high")
+            {
+                color = "#ff0000";
+                severity = $"`{payload.severity}`";
+
+                //paySeverity.Append($"<html><body><b><span style='color:red'>{payload.severity}</span></b></body></html>");
+                //severity = $"<b><span style='color:red'>{payload.severity}</span></b>";
+            }
+
+            else if (payload.severity == "critical")
+            {
+                color = "#ff7000";
+                severity =$"`{payload.severity}`";
+            }
+            else if (payload.severity=="medium")
+            {
+                color = "#ffff00";
+                severity = payload.severity;
+            }
+            else
+            {
+                color= "#36a64f";
+                severity = payload.severity;
+            }
+
+        
             using (var client = new HttpClient())
             {
 
                 SlackText.Root st = new SlackText.Root();
                 SlackText.Attachment at = new SlackText.Attachment();
+                at.color = $"{color}";
                 at.blocks = new();
 
                 st.attachments = new List<SlackText.Attachment>();
+                
                 SlackText.Block bl = new SlackText.Block();
 
                 bl.type = "section";
@@ -80,12 +117,12 @@ namespace githubeventslack
                 bl.text.text = $"*Package Name :* {payload.package_name}  \n " +
                    $"*Vulnerability Version Range :* {payload.vulnerable_version_range} \n" +
                    $"*Patched Version :* {payload.identifier} \n " +
-                   $"*Severity :* {payload.severity} \n " +
+                   $"*Severity :* {severity}\n " +
                    $"*Summary :* {payload.summary}\n" +
                    $"*Manifest_path :* {payload.manifest_path}\n" +
                    $"*Repository Name :* {payload.repository}";
                 bl.accessory = new SlackText.Accessory();
-                bl.accessory.type = "button";
+                bl.accessory.type =  "button";
 
                 bl.accessory.text = new();
 
@@ -100,7 +137,7 @@ namespace githubeventslack
                 at.blocks.Add(bl);
                 st.attachments.Add(at);
 
-                string sa = JsonConvert.SerializeObject(st);
+                //string sa = JsonConvert.SerializeObject(st);
 
                 var data = new StringContent(JsonConvert.SerializeObject(st), Encoding.UTF8, "application/json");
                 HttpMethod method = HttpMethod.Post;
@@ -135,6 +172,7 @@ namespace githubeventslack
         public class Attachment
         {
             public List<Block> blocks { get; set; }
+            public string color { get; set; }
         }
 
         public class Block
