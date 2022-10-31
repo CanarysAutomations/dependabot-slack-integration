@@ -19,6 +19,7 @@ namespace githubeventslack.Model
         public string identifier { get; set; }
         public string manifest_path { get; set; }
         public string repository { get; set; }
+        
 
     }
 }
