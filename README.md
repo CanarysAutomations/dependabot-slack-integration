@@ -1,5 +1,7 @@
 # dependabot-slack-integration
 
+[![Visual Studio - 2019](https://img.shields.io/static/v1?label=Visual+Studio&message=2019&color=%235C2D91&logo=visual+studio&logoColor=%23fffff)](https://) [![Slack - slack](https://img.shields.io/static/v1?label=Slack&message=slack&color=%23E01E5A&logo=slack&logoColor=%23fffff)](https://)
+
 ## Introduction
 
 This Azure Function App helps you to integrate [Dependabot alerts](https://docs.github.com/en/code-security/dependabot/dependabot-alerts/about-dependabot-alerts) to your slack channels.
