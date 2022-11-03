@@ -65,7 +65,7 @@ namespace githubeventslack
         public static async Task<string> SendSlackMessage(Payload payload)
         { 
 
-            var slackWebHookUrl = "https://hooks.slack.com/services/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";
+            var slackWebHookUrl = "https://hooks.slack.com/services/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";
             //var slackWebHookUrl = Environment.GetEnvironmentVariable("SLACKWEBHOOKURL");
             string color = string.Empty;
             var severity = string.Empty;
