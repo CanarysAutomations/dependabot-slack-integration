@@ -18,10 +18,15 @@ using System.Linq;
 using System.Drawing;
 using static githubeventslack.SlackText;
 using Microsoft.Extensions.Primitives;
+using System.Linq.Expressions;
+using log4net.Config;
+using log4net;
+using System.Reflection;
+using System.Threading;
 
 namespace githubeventslack
 {
-    public static class alertstoslack
+    public static class alertstoslackmlg
     {
         
 
@@ -30,43 +35,61 @@ namespace githubeventslack
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("Sending GitHub Payload to Slack function started");
+           // ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-
-            string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
-            var data = JsonConvert.DeserializeObject<Githubhook.Root>(requestBody);
-            Payload payload = new Payload();
-            payload.ghsa_id = data.alert.security_advisory.ghsa_id;
-            payload.cve_id = data.alert.security_advisory.cve_id;
-            payload.summary = data.alert.security_advisory.summary;
-            payload.description = data.alert.security_advisory.description;
-            payload.severity = data.alert.security_advisory.severity;
-            payload.package_name = data.alert.security_vulnerability.package.name;
-            payload.ecosystem = data.alert.security_vulnerability.package.ecosystem;
-            payload.vulnerable_version_range = data.alert.security_vulnerability.vulnerable_version_range;
-            payload.identifier = data.alert.security_vulnerability.first_patched_version.identifier;
-            payload.manifest_path = data.alert.dependency.manifest_path;
-            payload.repository = data.repository.name;
-
-
-            if (data.action == "fixed")
+            try
             {
-                log.LogInformation(requestBody);
-            }
-            else
-            {
-                await SendSlackMessage(payload);
-            }
+                // Console.WriteLine("Path : " + Directory.GetCurrentDirectory());
 
-            Payload responseMessage = payload;
-            return new OkObjectResult(responseMessage);
+                // var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
+                // XmlConfigurator.Configure(logRepository, new FileInfo(Path.Combine(Directory.GetCurrentDirectory().Replace("\\bin\\Debug\\net6.0",""), "log4net.config")));
+
+               // log.Debug("This is a Log4Net Debug message");
+                log.LogInformation("Sending GitHub Payload to Slack function started");
+
+
+                string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+                var data = JsonConvert.DeserializeObject<Githubhook.Root>(requestBody);
+                Payload payload = new Payload();
+                payload.ghsa_id = data.alert.security_advisory.ghsa_id;
+                payload.cve_id = data.alert.security_advisory.cve_id;
+                payload.summary = data.alert.security_advisory.summary;
+                payload.description = data.alert.security_advisory.description;
+                payload.severity = data.alert.security_advisory.severity;
+                payload.package_name = data.alert.security_vulnerability.package.name;
+                payload.ecosystem = data.alert.security_vulnerability.package.ecosystem;
+                payload.vulnerable_version_range = data.alert.security_vulnerability.vulnerable_version_range;
+                payload.identifier = data.alert.security_vulnerability.first_patched_version.identifier;
+                payload.manifest_path = data.alert.dependency.manifest_path;
+                payload.repository = data.repository.name;
+                log.LogInformation("data stored on payload");
+
+                if (data.action == "fixed")
+                {
+                    log.LogInformation(requestBody);
+                }
+                else
+                {
+                    await SendSlackMessage(payload);
+                    log.LogInformation("calling slack function");
+                }
+                log.LogInformation("Message posted on slack");
+                Payload responseMessage = payload;
+                return new OkObjectResult(responseMessage);
+           
+            }
+            catch(Exception ex)
+            {
+                log.LogInformation(ex.Message);
+            }
+            return default;
         }
-
         public static async Task<string> SendSlackMessage(Payload payload)
         { 
 
-            var slackWebHookUrl = "https://hooks.slack.com/services/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";
+            var slackWebHookUrl = "{your slack webhook url}";
             //var slackWebHookUrl = Environment.GetEnvironmentVariable("SLACKWEBHOOKURL");
+            
             string color = string.Empty;
             var severity = string.Empty;
 
