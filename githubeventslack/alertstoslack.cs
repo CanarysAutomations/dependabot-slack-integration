@@ -15,12 +15,8 @@ using System.Collections.Specialized;
 using System.Reflection.Emit;
 using System.Collections.Generic;
 using System.Linq;
-using System.Drawing;
-using static githubeventslack.SlackText;
 using Microsoft.Extensions.Primitives;
 using System.Linq.Expressions;
-using log4net.Config;
-using log4net;
 using System.Reflection;
 using System.Threading;
 
@@ -35,16 +31,11 @@ namespace githubeventslack
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-           // ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+           
 
             try
             {
-                // Console.WriteLine("Path : " + Directory.GetCurrentDirectory());
-
-                // var logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
-                // XmlConfigurator.Configure(logRepository, new FileInfo(Path.Combine(Directory.GetCurrentDirectory().Replace("\\bin\\Debug\\net6.0",""), "log4net.config")));
-
-               // log.Debug("This is a Log4Net Debug message");
+              
                 log.LogInformation("Sending GitHub Payload to Slack function started");
 
 
@@ -94,15 +85,14 @@ namespace githubeventslack
             var severity = string.Empty;
 
 
-            //StringBuilder paySeverity = new StringBuilder();
+            
 
             if (payload.severity=="high")
             {
                 color = "#ff0000";
                 severity = $"`{payload.severity}`";
 
-                //paySeverity.Append($"<html><body><b><span style='color:red'>{payload.severity}</span></b></body></html>");
-                //severity = $"<b><span style='color:red'>{payload.severity}</span></b>";
+            
             }
 
             else if (payload.severity == "critical")
