@@ -22,7 +22,7 @@ using System.Threading;
 
 namespace githubeventslack
 {
-    public static class alertstoslackmlg
+    public static class alertstoslackmsg
     {
         
 
